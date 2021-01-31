@@ -21,12 +21,12 @@ use rocket::request::{FromForm,Form};
 //use crate::web::struktura_chat::MessageChat;
 use crate::dbus::{dbus_send_chat, dbus_get_online_players};
 use log::LevelFilter;
-use dbus::arg::RefArg;
-use std::ops::Deref;
-use std::borrow::Borrow;
+//use dbus::arg::RefArg;
+//use std::ops::Deref;
+//use std::borrow::Borrow;
 
 #[get("/info")]
-fn info() -> Html<&'static str> {
+fn info() -> Html<String> {
     let mut bufor = String::new();
 
         //wczytujemy ciało strony w HTML
@@ -99,13 +99,12 @@ fn info() -> Html<&'static str> {
 
 
 
-    let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    Html(buf)
+    Html(bufor)
 }
 
 //"lista użytkowników, itemów, claimów, materacy. Z podglądem statystyk. Bany, ostrzeżenia, kicki, unbany"
 #[get("/users")]              // <- route attribute
-fn users() -> Html<&'static str> {  // <- request handler
+fn users() -> Html<String> {  // <- request handler
     let mut bufor = String::new();
     bufor.push_str(get_site_part("header").as_str());
 
@@ -115,13 +114,12 @@ fn users() -> Html<&'static str> {  // <- request handler
 
     //zamkniecie pliku!
     bufor.push_str(format!(r#"</body></html>"#).as_str());
-    let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    Html(buf)
+    Html(bufor)
 }
 
 //"interakcja z graczami i podgląd chatu"
 #[get("/chat")]              // <- route attribute
-fn chat() -> Html<&'static str> {  // <- request handler
+fn chat() -> Html<String> {  // <- request handler
     let mut bufor = String::new();
     bufor.push_str(get_site_part("header").as_str());
 
@@ -164,17 +162,14 @@ fn chat() -> Html<&'static str> {  // <- request handler
     //zamkniecie pliku!
     bufor.push_str(format!(r#"</body></html>"#).as_str());
 
-    //let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    //Html(buf)
-    //experyment
-    //let wyj = Box::new(bufor);
-    bufor
+    Html(bufor)
+
 }
 
 
 //"Podgląd mapy z możliwością interakcji. Tracking graczy, alerty LCB"
 #[get("/map")]              // <- route attribute
-fn map() -> Html<&'static str> {  // <- request handler
+fn map() -> Html<String> {  // <- request handler
     let mut bufor = String::new();
     bufor.push_str(get_site_part("header").as_str());
     bufor.push_str(format!(r#"<div id="MAIN_PANEL">"#).as_str());
@@ -182,13 +177,12 @@ fn map() -> Html<&'static str> {  // <- request handler
 
 //zamkniecie pliku!
     bufor.push_str(format!(r#"</body></html>"#).as_str());
-    let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    Html(buf)
+    Html(bufor)
 }
 
 //"Zarządzanie serwerem: restarty, komunikaty, resetowanie terenu, telnet po ssh"
 #[get("/admin")]              // <- route attribute
-fn admin() -> Html<&'static str> {  // <- request handler
+fn admin() -> Html<String> {  // <- request handler
     let mut bufor = String::new();
     bufor.push_str(get_site_part("header").as_str());
     bufor.push_str(format!(r#"<div id="MAIN_PANEL">"#).as_str());
@@ -202,12 +196,11 @@ fn admin() -> Html<&'static str> {  // <- request handler
 
     //zamkniecie pliku!
     bufor.push_str(format!(r#"</body></html>"#).as_str());
-    let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    Html(buf)
+    Html(bufor)
 }
 
 #[catch(404)]
-fn not_found() -> Html<&'static str> {  // <- request handler
+fn not_found() -> Html<String> {  // <- request handler
     let mut bufor = String::new();
     bufor.push_str(get_site_part("header").as_str());
 
@@ -220,13 +213,12 @@ fn not_found() -> Html<&'static str> {  // <- request handler
     bufor.push_str(format!(r#"</div></div>"#).as_str());
 
 
-    let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    Html(buf)
+    Html(bufor)
 }
 
 //strona logowania, narzucona odgórnie
 #[get("/login")]              // <- route attribute
-fn login() -> Html<&'static str> {  // <- request handler
+fn login() -> Html<String> {  // <- request handler
     //Ok(response.body(Vec::new())?)
 
     let mut bufor = String::new();
@@ -240,39 +232,11 @@ fn login() -> Html<&'static str> {  // <- request handler
 
     bufor.push_str(format!(r#"</div></div>"#).as_str());
 
-    let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    Html(buf)
+    Html(bufor)
 }
 
 
-/*TODO zrobić system logowania na cookies
-strona glowna (i podstrony) sprawdza czy klient jest zalogowany w ciasteczku
-jesli jest to wraca do glownej
-jesli nie jest to kieruje do strony logowania na steam
- - po zalogowaniu nastepuje redirect do strony, ktora tworzy ciasteczko
- - po stworzeniu przekierowuje do strony glownej (a ta znow sprawdza, itp)
 
-zalogowano -> kieruje do głównej
-błąd -> strona z błędem (nie jestes uprawniony blablabla) - logowanie
- */
-/*fn check_if_admin(cookies: &mut Cookies) -> bool {
-    let user = cookies.get_private("user");
-    let mut czy_uprawniony = false;
-    match user {
-        None => {
-            czy_uprawniony = false;
-        }
-        Some(cookie_steamid) => { //TODO porownujemy pobrane cookie z lista adminow w grze
-            if cookie_steamid.value().contains("76561198032259226") {
-                czy_uprawniony = true;
-            } else {
-                czy_uprawniony = false;
-            } //jesli haslo - steamid sie nie zgadza
-        }
-    }
-    czy_uprawniony
-    //true
-}*/
 fn check_if_admin(cookies: &mut Cookies) -> bool {
     let user = cookies.get_private("user");
     let mut czy_uprawniony = false;
@@ -280,7 +244,7 @@ fn check_if_admin(cookies: &mut Cookies) -> bool {
         None => {
             czy_uprawniony = false;
         }
-        Some(cookie_steamid) => { //TODO porownujemy pobrane cookie z lista adminow w grze
+        Some(cookie_steamid) => {
             for admin_ in admins_list().unwrap_or(vec!["Admins list empty :(".to_string()]) {
                 if cookie_steamid.value().contains(admin_.as_str()) {
                     czy_uprawniony = true;
@@ -298,7 +262,7 @@ fn check_if_admin(cookies: &mut Cookies) -> bool {
 }
 
 #[get("/<site>")]
-fn submit(mut cookies: Cookies, site: Option<String>) -> Html<&'static str> {
+fn submit(mut cookies: Cookies, site: Option<String>) -> Html<String> {
     if check_if_admin(&mut cookies) {
         match site {
             None => {
@@ -325,7 +289,7 @@ fn submit(mut cookies: Cookies, site: Option<String>) -> Html<&'static str> {
 
 /* Odbiorca wiadomości z chatu */
 #[get("/message_chat?<user>&<msg>")]
-fn send_message(mut cookies: Cookies, user: Option<String>, msg: Option<String>) -> Html<&'static str> {
+fn send_message(mut cookies: Cookies, user: Option<String>, msg: Option<String>) -> Html<String> {
     if check_if_admin(&mut cookies) {
         message_chat(user, msg)
     } else {
@@ -336,7 +300,7 @@ fn send_message(mut cookies: Cookies, user: Option<String>, msg: Option<String>)
     do zapisania na czacie
  */
 //#[get("/message_chat")]              // <- route attribute
-fn message_chat(user: Option<String>, msg: Option<String>) -> Html<&'static str> {  // <- request handler
+fn message_chat(user: Option<String>, msg: Option<String>) -> Html<String> {  // <- request handler
     let mut bufor = String::new();
     bufor.push_str(get_site_part("header").as_str());
 
@@ -361,8 +325,7 @@ fn message_chat(user: Option<String>, msg: Option<String>) -> Html<&'static str>
     */
     //zamkniecie pliku!
     bufor.push_str(format!(r#"</body></html>"#).as_str());
-    let buf: &'static str = Box::leak(bufor.into_boxed_str());
-    Html(buf)
+    Html(bufor)
 }
 
 //przekierowuje z glownej strony do /info
@@ -390,6 +353,7 @@ fn steam_redirector(mut cookies: Cookies, input: Option<Form<DaneSteam>>) -> Red
             //Redirect::to("/")
         }
     };
+    //possible memory leak, be crfly
     let buf: &'static str = Box::leak(pass.into_boxed_str());
     let mut ciacho = Cookie::new(user, buf);
     ciacho.set_same_site(SameSite::Lax);
@@ -453,10 +417,10 @@ fn steamlogin() -> Redirect {
     };
     let redirector = steam_auth::Redirector::new(format!("http://{}:{}", myip, pobierz_port()), "/steam_redirector").unwrap();
     let przekierowanie = redirector.url().to_string();
-    let buf: &'static str = Box::leak(przekierowanie.into_boxed_str());
 
+    let buf: &'static str = Box::leak(przekierowanie.into_boxed_str());
     Redirect::to(buf)
-    //Redirect::to(format!("https://steamcommunity.com/oauth/login?response_type=token&client_id=client_id_here&state=whatever_you_want"))
+    //("https://steamcommunity.com/oauth/login?response_type=token&client_id=client_id_here&state=whatever_you_want"))
 }
 
 //szczątkowe elementy strony (menu, belka dolna)
@@ -505,7 +469,7 @@ fn get_site_part(part: &str) -> String {
 }
 
 #[get("/styles/style.css")]
-fn style() -> Css<&'static str> {
+fn style() -> Css<String> {
     //log::info!("Próba wczytania pliku css");
     let mut bufor = String::new();
     let plik_css = File::open("Mods/SevenWebser/styles/style.css");
@@ -517,10 +481,7 @@ fn style() -> Css<&'static str> {
             panic!("Can't read from file");
         }
     };
-
-    //plik_css.read_to_string(&mut bufor).unwrap();
-
-    Css(Box::leak(bufor.into_boxed_str()))
+    Css(bufor)
 }
 
 pub fn start_main() {
